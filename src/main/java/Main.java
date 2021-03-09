@@ -6,9 +6,9 @@ import java.io.IOException;
 
 public class Main {
     static Menu menu = new Menu();
+    static Services services = new Services();
 
     public static void main(String[] args) {
-        Services services = new Services();
         boolean cycle = true;
         while (cycle) {
             String mainMenu = menu.startMessage();
@@ -18,13 +18,17 @@ public class Main {
                     switch (dirMenu) {
                         case "1" -> {
                             String dirDir = menu.enterDirPath();
-                            services.getDirList(new File(dirDir));
+                            services.getDirList(new File(dirDir), "name");
                         }
                         case "2" -> {
+                            String dirDir = menu.enterDirPath();
+                            services.getDirList(new File(dirDir), "size");
+                        }
+                        case "3" -> {
                             String infoDir = menu.enterDirPath();
                             services.getDirInfo(new File(infoDir));
                         }
-                        case "3" -> {
+                        case "4" -> {
                         }
                     }
                 }
@@ -36,7 +40,7 @@ public class Main {
                             System.out.println(new File(delete).delete() ? "OK" : "Ошибка");
                         }
                         case "2" -> {
-                            String create = menu.enterDirPath();
+                            String create = menu.enterFilePath(false);
                             try {
                                 System.out.println(new File(create).createNewFile() ? "OK" : "Ошибка");
                             } catch (IOException e) {
@@ -53,7 +57,7 @@ public class Main {
                     System.out.println("Расположение нового файла.");
                     String toPath = menu.enterFilePath(false);
                     try {
-                        System.out.println(services.copyFiles(fromPath, toPath) ? "OK" : "Ошибка");
+                        services.copyFiles(fromPath, toPath);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

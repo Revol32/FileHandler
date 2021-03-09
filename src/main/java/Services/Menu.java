@@ -26,17 +26,18 @@ public class Menu {
     }
 
     public String dirMenu() {
-        List<String> menusList = Arrays.asList("1", "2", "3");
+        List<String> menusList = Arrays.asList("1", "2", "3", "4");
         System.out.println("Информация о папке.");
         System.out.println("Выбирите действие:");
-        System.out.println("1. dir.");
-        System.out.println("2. Статистика.");
-        System.out.println("3. Выход.");
+        System.out.println("1. dir, Сортировка по имени.");
+        System.out.println("2. dir, Сортировка по размеру.");
+        System.out.println("3. Статистика.");
+        System.out.println("4. Выход.");
         System.out.println("Выберете пункт меню:");
         String menu = new Scanner(System.in).nextLine();
         System.out.println();
         if (!menusList.contains(menu)) {
-            System.out.println("Ввидите верное значение от 1 до 3");
+            System.out.println("Ввидите верное значение от 1 до 4");
             dirMenu();
         }
         return menu;
@@ -65,6 +66,7 @@ public class Menu {
         File file = new File(path);
         if (exist) {
             if (file.isFile()) {
+                System.out.println();
                 return path;
             } else {
                 System.out.println("Путь до файла не верен (файла возможно не сушествует).");
@@ -73,6 +75,7 @@ public class Menu {
         } else {
             if (!file.isFile()) {
                 if (Services.getFileExtension(file).length() > 0) {
+                    System.out.println();
                     return path;
                 } else {
                     System.out.println("Задайте верное раширение файла");
@@ -91,6 +94,7 @@ public class Menu {
         String path = new Scanner(System.in).nextLine();
         File file = new File(path);
         if (file.isDirectory()) {
+            System.out.println();
             return path;
         } else {
             System.out.println("Введеный путь не сушествует");

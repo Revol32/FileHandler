@@ -71,63 +71,81 @@ public class Services {
         return count;
     }
 
-    public void getDirList(File dirToOutput) {
-        LinkedList<File> dirsList = new LinkedList<>();
-        LinkedList<File> filesList = new LinkedList<>();
-        for (File fileToType : Objects.requireNonNull(dirToOutput.listFiles())) {
-            if (fileToType.isDirectory()) {
-                dirsList.add(fileToType);
-            }
-            if (fileToType.isFile()) {
-                filesList.add(fileToType);
-            }
-        }
-        Comparator<File> comparator = Comparator.comparing(File::getName);
-        dirsList.sort(comparator);
-        filesList.sort(comparator);
-        int i = 1;
+    public void getDirList(File dirToOutput, String sortType) {
         System.out.println("...");
-        for (File dir : dirsList) {
-            String fileName = formatToPrint(dir.getName(), 20);
-            System.out.println(i + ". " + fileName + "dir");
-            i++;
+        if (!(dirToOutput.listFiles().length > 0)) {
+            System.out.println("Папка пуста");
+        } else {
+            LinkedList<File> dirsList = new LinkedList<>();
+            LinkedList<File> filesList = new LinkedList<>();
+            for (File fileToType : Objects.requireNonNull(dirToOutput.listFiles())) {
+                if (fileToType.isDirectory()) {
+                    dirsList.add(fileToType);
+                }
+                if (fileToType.isFile()) {
+                    filesList.add(fileToType);
+                }
+            }
+            Comparator<File> comparator;
+            switch (sortType) {
+                case "name" -> {
+                    comparator = Comparator.comparing(File::getName);
+                    dirsList.sort(comparator);
+                    filesList.sort(comparator);
+                }
+                case "size" -> {
+                    comparator = Comparator.comparing(File::length);
+                    dirsList.sort(Comparator.comparing(File::getName));
+                    filesList.sort(comparator.reversed());
+                }
+                default -> throw new IllegalStateException("Unexpected value: " + sortType);
+            }
+            int i = 1;
+            for (File dir : dirsList) {
+                String fileName = formatToPrint(dir.getName(), 50);
+                System.out.println(i + ". " + fileName + "dir");
+                i++;
+            }
+            for (File file : filesList) {
+                String fileName = formatToPrint(file.getName(), 50);
+                BigDecimal bigDecimal = BigDecimal.valueOf((double) file.length() / 1024).setScale(1, RoundingMode.HALF_UP);
+                String fileSize = formatToPrint(bigDecimal + "KB", 15);
+                String extension = formatToPrint(getFileExtension(file), 7);
+                System.out.println(i + ". " + fileName + extension + fileSize);
+                i++;
+            }
         }
-        for (File file : filesList) {
-            String fileName = formatToPrint(file.getName(), 20);
-            BigDecimal bigDecimal = BigDecimal.valueOf((double) file.length() / 1024).setScale(1, RoundingMode.HALF_UP);
-            String fileSize = formatToPrint(bigDecimal + "KB", 10);
-            String extension = formatToPrint(getFileExtension(file), 7);
-            System.out.println(i + ". " + fileName + extension + fileSize);
-            i++;
-        }
-
+        System.out.println();
     }
 
     private String formatToPrint(String string, int minLength) {
-        if (string.length() < minLength) {
-            StringBuilder stringBuilder = new StringBuilder(string);
-            while (stringBuilder.length() < minLength) {
-                stringBuilder.append(" ");
-            }
-            string = stringBuilder.toString();
-        }
+        StringBuilder stringBuilder = new StringBuilder(string);
+        do {
+            stringBuilder.append(" ");
+        } while (stringBuilder.length() < minLength);
+        string = stringBuilder.toString();
         return string;
     }
 
     public void getDirInfo(File file) {
         String path = file.getPath();
-        long countDirs = countDirsInDirectory(path);
-        long countFiles = countFilesInDirectory(path);
-        String filesAVGSize = getFilesAVGSizeInDir(path);
-        String fileMaxSize = getFileMaxSizeInDir(path);
-        System.out.println("Папка содержит:");
-        System.out.println(countDirs + " папок");
-        System.out.println(countFiles + " файлов");
-        System.out.println("Самый большой файл: " + fileMaxSize);
-        System.out.println("Средний размер файлов: " + filesAVGSize);
+        if (!(Objects.requireNonNull(file.listFiles()).length > 0)) {
+            System.out.println("Папка пуста");
+        } else {
+            long countDirs = countDirsInDirectory(path);
+            long countFiles = countFilesInDirectory(path);
+            String filesAVGSize = getFilesAVGSizeInDir(path);
+            String fileMaxSize = getFileMaxSizeInDir(path);
+            System.out.println("Папка содержит:");
+            System.out.println(countDirs + " папок");
+            System.out.println(countFiles + " файлов");
+            System.out.println("Самый большой файл: " + fileMaxSize);
+            System.out.println("Средний размер файлов: " + filesAVGSize);
+            System.out.println();
+        }
     }
 
-    public boolean copyFiles(String from, String to, String mode) throws IOException {
+    public void copyFiles(String from, String to, String mode) throws IOException {
         switch (mode) {
             case "Files":
                 Files.copy(Path.of(from), Path.of(to));
@@ -146,13 +164,12 @@ public class Services {
                     }
                 }
                 break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + mode);
         }
-        File fromFile = new File(from);
-        File toFile = new File(to);
-        return fromFile.equals(toFile);
     }
 
-    public boolean copyFiles(String from, String to) throws IOException {
-        return copyFiles(from, to, "Files");
+    public void copyFiles(String from, String to) throws IOException {
+        copyFiles(from, to, "Files");
     }
 }
